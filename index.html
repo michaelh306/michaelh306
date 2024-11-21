@@ -1,17 +1,18 @@
 <html>
   <head>
     <title>Pitch Stats</title>
-    <link rel="stylesheet" href="styles.css"></link>
+    <link rel="stylesheet" href="styles.css">
   </head>
   <body>
     <h1 class="red">Trackman Pitch Stats Viewer</h1>
-    <form onsubmit="downloadData();">
+    <form onsubmit="downloadData(); return false;">
       <label>Starting date</label>
-      <input type="date" id="startdate"></input>
+      <input type="date" id="startdate">
       <label>End date</label>
-      <input type="date" id="enddate"></input>
+      <input type="date" id="enddate">
       <button>Filter</button>
     </form>
+    
     <table>
       <tr>
         <th>ID</th>
@@ -20,20 +21,91 @@
       </tr>
       <tr>
         <td><a href="details.html">Pitch 12345</a></td>
-        <td>95</td>
+        <td class="speed">95</td>
         <td>--</td>
       </tr>
       <tr>
         <td><a href="details.html">Pitch 12346</a></td>
-        <td>92</td>
+        <td class="speed">92</td>
         <td>--</td>
       </tr>
       <tr>
         <td><a href="details.html">Pitch 12347</a></td>
-        <td>75</td>
+        <td class="speed">75</td>
         <td>K</td>
       </tr>
     </table>
-    <script src="script.js"></script>
+    
+    <div id="stats">
+      <p><strong>Mean Speed:</strong> <span id="mean"></span></p>
+      <p><strong>Median Speed:</strong> <span id="median"></span></p>
+      <p><strong>Mode Speed:</strong> <span id="mode"></span></p>
+    </div>
+
+    <script>
+      // Function to calculate mean
+      function calculateMean(arr) {
+        const sum = arr.reduce((acc, val) => acc + val, 0);
+        return (sum / arr.length).toFixed(2);
+      }
+
+      // Function to calculate median
+      function calculateMedian(arr) {
+        arr.sort((a, b) => a - b);
+        const middle = Math.floor(arr.length / 2);
+        if (arr.length % 2 === 0) {
+          return ((arr[middle - 1] + arr[middle]) / 2).toFixed(2);
+        } else {
+          return arr[middle].toFixed(2);
+        }
+      }
+
+      // Function to calculate mode
+      function calculateMode(arr) {
+        const frequency = {};
+        let maxFreq = 0;
+        let modes = [];
+
+        // Calculate frequency of each number
+        arr.forEach((value) => {
+          frequency[value] = (frequency[value] || 0) + 1;
+          if (frequency[value] > maxFreq) {
+            maxFreq = frequency[value];
+          }
+        });
+
+        // Find all numbers with max frequency
+        for (let value in frequency) {
+          if (frequency[value] === maxFreq) {
+            modes.push(parseFloat(value));
+          }
+        }
+
+        if (modes.length === arr.length) {
+          return 'No mode'; // No mode if all values are unique
+        } else {
+          return modes.join(', ');
+        }
+      }
+
+      // Function to update the stats on the page
+      function updateStats() {
+        // Get all the pitch speeds from the table
+        const speeds = Array.from(document.querySelectorAll('.speed'))
+                             .map(td => parseFloat(td.textContent));
+        
+        const mean = calculateMean(speeds);
+        const median = calculateMedian(speeds);
+        const mode = calculateMode(speeds);
+        
+        // Display stats on the page
+        document.getElementById('mean').textContent = mean;
+        document.getElementById('median').textContent = median;
+        document.getElementById('mode').textContent = mode;
+      }
+
+      // Call updateStats when the page loads
+      window.onload = updateStats;
+    </script>
   </body>
 </html>
